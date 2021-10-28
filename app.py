@@ -8,23 +8,23 @@ CORS(app)
 users = []
 
 @app.route('/index')
+def index():
+    return jsonify(), 200
 
 
 @app.route("/signup", methods=["POST"])
 def signup():
     data = request.get_json()
-    first_name = data["first_name"]
-    last_name = data["last_name"]
-    date = data["date"]
+    name = data["name"]
     gender = data["gender"]
     nickname = data["nickname"]
+    email = data["email"]
     password = data["password"]
-    phone = data["phone"]
+    
     for user in users:
         if user.nickname == nickname:
             return jsonify({"message": "nickname repeated"}), 400
-    users.append(dtos.User(first_name, last_name,
-                 date, gender, nickname, password, phone))
+    users.append(dtos.User(name, gender, nickname, email, password))
     return jsonify(request.get_json()), 200
 
 
