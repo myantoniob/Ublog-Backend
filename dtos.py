@@ -6,3 +6,10 @@ class User:
         self.email = email
         self.password = password
         
+
+class Publication:
+    def __init__(self, type, url, date, category):
+        self.type = type
+        self.url = url
+        self.date = date
+        self.category = category
