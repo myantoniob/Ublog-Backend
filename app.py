@@ -11,6 +11,26 @@ publications = []
 users.append(dtos.User("juan", "M", "jr","j@j.com","456"))
 users.append(dtos.User("melvin", "M", "mel","m@m.com","789"))
 
+
+def password_validar(password):
+    numeros = ["0","1", "2", "3","4","5","6","7","8","9"]
+    simbolos = ["/","*","-","+",".","_","@","|","#","$","%","&","(",")","=","?","¿","!","¡","{","[","}","]","^"]
+    tengo_num = False
+    tengo_sim = False
+    if len(password) > 7:
+        for hi in password:
+                for num in numeros:
+                    if hi == num:
+                        tengo_num = True
+                for sim in simbolos:
+                    if hi == sim:
+                        tengo_sim = True
+    if tengo_num and tengo_sim:
+        return True
+    else:
+        return False
+
+
 @app.route('/index')
 def index():
     return jsonify(), 200
@@ -24,13 +44,16 @@ def signup():
     nickname = data["nickname"]
     email = data["email"]
     password = data["password"]
-    
+
     for user in users:
         if user.nickname == nickname:
-            return jsonify({"message": "nickname repeated"}), 400
-    users.append(dtos.User(name, gender, nickname, email, password))
-    
-    return jsonify(request.get_json()), 200
+            return jsonify({"nick": "nickname repeated"}), 401
+
+    if password_validar(password):
+        users.append(dtos.User(name, gender, nickname, email, password))
+        return jsonify(request.get_json()), 200
+    else:
+        return jsonify({"message": "weak password"}), 400
 
 
 @app.route("/login", methods=["POST"])
@@ -39,11 +62,6 @@ def login():
     nickname = data["nickname"]
     password = data["password"]
     for user in users:
-        print(nickname)
-        print(users[0].nickname)
-        print(user.nickname == nickname)
-        print(user.password)
-        print(password)
         if user.nickname == nickname:
             if user.password == password:
                 return jsonify({
@@ -54,8 +72,9 @@ def login():
                     "password": user.password
                 }), 200
             else:
-                return jsonify({"message": "bad credentials"}), 400
-    return jsonify({"message", "user not found"}), 400
+                return jsonify({"usuario": "usuario existente"}), 400
+    return jsonify({"message": "user not found"}), 400
+
 
 @app.route("/update", methods=["POST"])
 def update():
@@ -68,39 +87,70 @@ def update():
     password = data["password"]
      
     for user in users:
-        print(user.nickname == cnickname)
         if user.nickname == cnickname:
             user.name = name
             user.gender = gender
-            user.nickname = nickname
             user.email = email
-            user.password = password
-            for si in users:
-                
-                print(si.nickname)
-                print(si.password)
-            return jsonify(request.get_json())
+            if password_validar(password):
+                user.password = password
+            else:
+                return jsonify({"passd": "weak password"})
+        
+            if user.nickname == nickname:
+                user.nickname = nickname
+                return jsonify(request.get_json())
+            else:
+                for us in users:
+                    if us.nickname == nickname:
+                        return jsonify({"user":"user repetido"})
+                    else:
+                        user.nickname = nickname
+                        return jsonify(request.get_json())    
         else:
-            return jsonify({"message": " interno usuario no existe"})
-    return jsonify({"message": "usuario no existe"})
-
-
+            return jsonify({"not": "No esta logeado"})
+    
 
 @app.route("/release", methods=["GET" ,"POST"])
 def release():
     if request.method == "GET":
-        return jsonify({
-            "images": publications[0].type,
-            "url": publications[0].url,
-            "date": publications[0].date,
-            "category": publications[0].category
-        })
+        temporal = []
+        for publication in publications:
+            temporal.append({
+                "type": publication.type,
+                "url": publication.url,
+                "date": publication.date,
+                "category": publication.category
+            })
+
+        return jsonify(temporal)
 
     elif request.method == "POST":
         data = request.get_json()
-        type = data["images"]
+        nickname = data["nickname"]
+        type = data["type"]
         url = data["url"]
         date = data["date"]
-        category = data["category"] 
-        publications.append(dtos.Publication(type, url, date, category))
-        return jsonify(request.get_json())
+        category = data["category"]
+
+        for user in users:
+            if user.nickname == nickname:
+                user.user_post.append(dtos.Publication(type, url, date, category))
+                publications.append(dtos.Publication(type, url, date, category))
+                return jsonify(request.get_json())
+
+@app.route("/myRelease", methods=["GET", "POST"])
+def myRelease():
+    if request.method == "POST":
+        data = request.get_json()
+        nickname = data["nickname"]
+        temporal = []
+        for user in users:
+            if user.nickname == nickname:
+                for publication in user.user_post:
+                    temporal.append({
+                    "type": publication.type,
+                    "url": publication.url,
+                    "date": publication.date,
+                    "category": publication.category
+                    })
+                return jsonify(temporal)
