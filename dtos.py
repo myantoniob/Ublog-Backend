@@ -10,8 +10,11 @@ class User:
         
 
 class Publication:
-    def __init__(self, type, url, date, category):
+    def __init__(self, type, url, date, category, nickname, id):
         self.type = type
         self.url = url
         self.date = date
         self.category = category
+        self.nickname = nickname
+        self.cantidad = 0
+        self.id = id

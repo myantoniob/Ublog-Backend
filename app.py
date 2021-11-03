@@ -1,12 +1,14 @@
 import dtos
 from flask import Flask, json, request, jsonify
 from flask_cors import CORS
+import random
 
 app = Flask(__name__)
 CORS(app)
 
 users = []
 publications = []
+
 
 users.append(dtos.User("juan", "M", "jr","j@j.com","456"))
 users.append(dtos.User("melvin", "M", "mel","m@m.com","789"))
@@ -115,11 +117,15 @@ def release():
     if request.method == "GET":
         temporal = []
         for publication in publications:
+            print(publication.cantidad)
             temporal.append({
                 "type": publication.type,
                 "url": publication.url,
                 "date": publication.date,
-                "category": publication.category
+                "category": publication.category,
+                "cantidad": publication.cantidad,
+                "nickname": publication.nickname,
+                "id": publication.id 
             })
 
         return jsonify(temporal)
@@ -134,9 +140,11 @@ def release():
 
         for user in users:
             if user.nickname == nickname:
-                user.user_post.append(dtos.Publication(type, url, date, category))
-                publications.append(dtos.Publication(type, url, date, category))
+                id = random.randint(100,9999)
+                user.user_post.append(dtos.Publication(type, url, date, category, nickname, id))
+                publications.append(dtos.Publication(type, url, date, category, nickname, id))
                 return jsonify(request.get_json())
+
 
 @app.route("/myRelease", methods=["GET", "POST"])
 def myRelease():
@@ -147,10 +155,34 @@ def myRelease():
         for user in users:
             if user.nickname == nickname:
                 for publication in user.user_post:
+                   
                     temporal.append({
+                    "nickname": nickname,
                     "type": publication.type,
                     "url": publication.url,
                     "date": publication.date,
-                    "category": publication.category
+                    "category": publication.category,
+                    "cantidad": publication.cantidad
                     })
+                    
                 return jsonify(temporal)
+
+@app.route("/increment", methods=["GET", "POST"])
+def increment():
+    if request.method == "POST":
+        data = request.get_json()
+        nickname = data["nickname"]
+        id = data["id"]
+
+        for user in users:
+            if user.nickname == nickname:
+                for publication in user.user_post:
+                    if publication.id == id:
+                        publication.cantidad += 1
+                        print(publication.cantidad)
+        for cation in publications:
+            if cation.id == id:
+                cation.cantidad += 1
+                print(cation.cantidad)
+
+        return jsonify({"cantidad": cation.cantidad})
