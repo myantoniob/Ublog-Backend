@@ -9,6 +9,7 @@ CORS(app)
 users = []
 publications = []
 
+users.append(dtos.User("Guillermo Peitzner", "M", "admin","admin@ipc1.com","admin@ipc1"))
 
 users.append(dtos.User("juan", "M", "jr","j@j.com","456"))
 users.append(dtos.User("melvin", "M", "mel","m@m.com","789"))
@@ -63,6 +64,24 @@ def login():
     data = request.get_json()
     nickname = data["nickname"]
     password = data["password"]
+
+    if nickname == "admin" and password == "admin@ipc1":
+        for user in users:
+            if user.nickname == nickname:
+                if user.password == password:
+                    return jsonify({
+                        "name": user.name,
+                    "gender": user.gender,
+                    "nickname": user.nickname,
+                    "email": user.email,
+                    "password": user.password,
+                    "admin": "admin"
+                    })
+                else:
+                    return jsonify({"usuario": "usuario existente"}), 400
+        return jsonify({"message": "user not found"}), 400
+        
+
     for user in users:
         if user.nickname == nickname:
             if user.password == password:
