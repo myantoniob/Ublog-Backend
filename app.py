@@ -12,8 +12,6 @@ publications = []
 users.append(dtos.User("Guillermo Peitzner", "M", "admin","admin@ipc1.com","admin@ipc1"))
 
 users.append(dtos.User("juan", "M", "jr","j@j.com","456"))
-users.append(dtos.User("melvin", "M", "mel","m@m.com","789"))
-
 
 def password_validar(password):
     numeros = ["0","1", "2", "3","4","5","6","7","8","9"]
@@ -163,6 +161,8 @@ def release():
                 user.user_post.append(dtos.Publication(type, url, date, category, nickname, id))
                 publications.append(dtos.Publication(type, url, date, category, nickname, id))
                 return jsonify(request.get_json())
+
+
 
 
 @app.route("/myRelease", methods=["GET", "POST"])
