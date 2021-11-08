@@ -9,9 +9,33 @@ CORS(app)
 users = []
 publications = []
 
+
+
+def organizar(publications):
+    for numpasado in range(len(publications)-1,0,-1):  
+        for i in range(numpasado):    
+            if publications[i].cantidad < publications[i+1].cantidad:
+                temp = publications[i]
+                publications[i] = publications[i+1]
+                publications[i+1] = temp
+    
+def user_organizar(users):
+    for numpasado in range(len(users)-1,0,-1):
+        for i in range(numpasado):
+            if len(users[i].user_post) < len(users[i+1].user_post):
+                temp = users[i]
+                users[i] = users[i+1]
+                users[i+1] = temp
+
+            
+
+
+
 users.append(dtos.User("Guillermo Peitzner", "M", "admin","admin@ipc1.com","admin@ipc1"))
 
 users.append(dtos.User("juan", "M", "jr","j@j.com","456"))
+
+
 
 def password_validar(password):
     numeros = ["0","1", "2", "3","4","5","6","7","8","9"]
@@ -131,10 +155,12 @@ def update():
 
 @app.route("/release", methods=["GET" ,"POST"])
 def release():
+    organizar(publications)
+        
     if request.method == "GET":
         temporal = []
         for publication in publications:
-            print(publication.cantidad)
+            #print(publication.cantidad)
             temporal.append({
                 "type": publication.type,
                 "url": publication.url,
@@ -205,3 +231,40 @@ def increment():
                 print(cation.cantidad)
 
         return jsonify({"cantidad": cation.cantidad})
+
+@app.route("/listusers", methods=["GET", "POST"])
+def listusers():
+    if request.method == "GET":
+        temporal = []
+        for user in users:
+            temporal.append(user.nickname)
+        return jsonify(temporal)
+
+
+@app.route("/allusers", methods=["GET","POST"])
+def allusers():
+    if request.method == "GET":
+        user_organizar(users)
+        temporal = []
+        for user in users:
+             temporal.append({
+                 "name": user.name,
+                 "gender": user.gender,
+                 "nickname": user.nickname,
+                 "email": user.email,
+                 "password": user.password
+             })
+        return jsonify(temporal)
+
+@app.route("/alluserposts", methods=["GET","POST"])
+def alluserposts():
+    if request.method == "GET":
+        user_organizar(users)
+        temporal = []
+        for user in users:
+             temporal.append({
+                 "name": user.name,
+                 "nickname": user.nickname,
+                 "cantidad": len(user.user_post)
+             })
+        return jsonify(temporal)
